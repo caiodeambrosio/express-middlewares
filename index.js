@@ -9,7 +9,7 @@ function checkProjectBody(req, res, next) {
     return res.status(400).json({ error: "title field is required" });
   } else if (!req.body.id) {
     return res.status(400).json({ error: "id field is required" });
-  } else if (projects.some(project => project.id === id)) {
+  } else if (projects.some(project => project.id === req.body.id)) {
     return res.status(400).json({ error: "id already exists" });
   }
 
@@ -37,13 +37,14 @@ function checkProjectExists(req, res, next) {
   return next();
 }
 
+function logRequestQuantity(req, res, next) {
+  console.count("Número de requisições");
+  return next();
+}
+
 server.use(express.json());
 
-server.use((req, res, next) => {
-  requestQuantity++;
-  console.log("Quantidade de Requisições efetuadas: ", requestQuantity);
-  return next();
-});
+server.use(logRequestQuantity);
 
 server.get("/projects", (req, res) => {
   res.json(projects);
@@ -71,19 +72,19 @@ server.put("/projects/:id", checkProjectExists, (req, res) => {
   const { id } = req.params;
   const { title } = req.body;
 
-  projects.map(project => {
-    if (project.id === String(id)) {
-      project.title = title;
-    }
-  });
+  const project = projects.find(p => p.id == id);
 
-  return res.json(projects);
+  project.title = title;
+
+  return res.json(project);
 });
 
 server.delete("/projects/:id", checkProjectExists, (req, res) => {
   const { id } = req.params;
 
-  projects.splice(id, 1);
+  const projectIndex = projects.findIndex(project => project.id == id);
+
+  projects.splice(projectIndex, 1);
 
   return res.send();
 });
@@ -96,10 +97,11 @@ server.post(
     const { id } = req.params;
     const { title } = req.body;
 
-    const projectIndex = projects.findIndex(project => project.id == id);
-    projects[projectIndex].tasks.push(title);
+    const project = projects.find(p => p.id == id);
 
-    return res.json(projects[projectIndex]);
+    project.tasks.push(title);
+
+    return res.json(project);
   }
 );
 
