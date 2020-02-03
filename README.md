@@ -1,2 +1,2 @@
 # express-middlewares
-Simple implementation with node to learn about express middlewares
+Implementing a simple task register node to learn about express middlewares
