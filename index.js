@@ -2,7 +2,6 @@ const express = require("express");
 const server = express();
 
 const projects = [];
-var requestQuantity = 0;
 
 function checkProjectBody(req, res, next) {
   if (!req.body.title) {
@@ -48,16 +47,6 @@ server.use(logRequestQuantity);
 
 server.get("/projects", (req, res) => {
   res.json(projects);
-});
-
-server.get("/projects/:id", checkProjectExists, (req, res) => {
-  const { id } = req.params;
-
-  projects.map(project => {
-    if (project.id === String(id)) {
-      res.json(project);
-    }
-  });
 });
 
 server.post("/projects", checkProjectBody, (req, res) => {
